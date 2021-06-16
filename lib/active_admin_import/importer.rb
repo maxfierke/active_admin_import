@@ -72,12 +72,12 @@ module ActiveAdminImport
     #
     def batch_slice_columns(slice_columns)
       use_indexes = []
-      headers.values.each_with_index do |val, index|
+      @original_headers.values.each_with_index do |val, index|
         use_indexes << index if val.in?(slice_columns)
       end
       return csv_lines if use_indexes.empty?
       # slice CSV headers
-      @headers = headers.to_a.values_at(*use_indexes).to_h
+      @headers = @original_headers.to_a.values_at(*use_indexes).to_h
       # slice CSV values
       csv_lines.map! do |line|
         line.values_at(*use_indexes)
@@ -99,7 +99,7 @@ module ActiveAdminImport
       batch_size = options[:batch_size].to_i
       File.open(file.path) do |f|
         # capture headers if not exist
-        prepare_headers { CSV.parse(f.readline, @csv_options).first }
+        @original_headers = prepare_headers { CSV.parse(f.readline, @csv_options).first }.dup
         f.each_line do |line|
           lines << line if line.present?
           if lines.size == batch_size || f.eof?

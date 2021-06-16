@@ -440,13 +440,13 @@ describe 'import', type: :feature do
                             importer.batch_slice_columns(slice_columns)
                           }
       visit "/admin/authors/import"
-      upload_file!(:authors)
     end
 
     context "slice last column and superfluous column" do
       let(:slice_columns) { %w(name last_name not_existing_column) }
 
       it "should not fill `birthday` column" do
+        upload_file!(:authors)
         expect(Author.pluck(:name, :last_name, :birthday)).to match_array(
           [
             ["Jane", "Roe", nil],
@@ -460,6 +460,21 @@ describe 'import', type: :feature do
       let(:slice_columns) { %w(name birthday) }
 
       it "should not fill `last_name` column" do
+        upload_file!(:authors)
+        expect(Author.pluck(:name, :last_name, :birthday)).to match_array(
+          [
+            ["Jane", nil, "1988-11-16".to_date],
+            ["John", nil, "1986-05-01".to_date]
+          ]
+        )
+      end
+    end
+
+    context 'with file split across batches' do
+      let(:slice_columns) { %w(name last_name) }
+
+      it "should not fill `id` column" do
+        upload_file!(:authors)
         expect(Author.pluck(:name, :last_name, :birthday)).to match_array(
           [
             ["Jane", nil, "1988-11-16".to_date],

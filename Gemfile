@@ -17,4 +17,5 @@ group :test do
   gem 'capybara'
   gem 'poltergeist'
   gem 'jquery-ui-rails', '~> 5.0'
+  gem 'bootsnap', require: false
 end
